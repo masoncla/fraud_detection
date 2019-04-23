@@ -1,0 +1,47 @@
+<html>
+<body>
+    <link rel='stylesheet' href='static/table.css' />
+    <h2>Details </h2> <a href="/" style="color:white" >Home</a> <a href="/table" style="color:white" >Table</a>
+<div id="table">
+    <table class="table table-striped" style="max-width: 700px;">
+        <thead>
+            <tr>
+                <th>ID</th>
+                <th>Name</th>
+                <th>Org Name</th>
+                <th>Venue Name</th>
+                <th>Payee Name</th>
+                <th>Venue Address</th>
+                <th>Venue State</th>
+                <th>Country</th>
+                <th>Payout Type</th>
+                <th>Channels</th> 
+                <th>Probability</th>
+                <th>Tier</th>  
+            </tr>
+        </thead>
+                
+        <tbody>
+            {% for row_index in range(results['object_id']|count) %}
+            <tr>
+                <td>{{ results['object_id'][row_index] }}</td>
+                <td>{{ results['name'][row_index] }}</td>
+                <td>{{ results['org_name'][row_index] }}</td>
+                <td>{{ results['venue_name'][row_index] }}</td>
+                <td>{{ results['payee_name'][row_index] }}</td>
+                <td>{{ results['venue_address'][row_index] }}</td>
+                <td>{{ results['venue_state'][row_index] }}</td>
+                <td>{{ results['country'][row_index] }}</td>
+                <td>{{ results['payout_type'][row_index] }}</td>
+                <td>{{ results['channels'][row_index] }}</td>
+                <td>{{ results['probability'][row_index] }}</td>
+                <td>{{ results['tier'][row_index] }}</td>
+                
+            </tr>
+            {% endfor %}
+        </tbody>
+        </table>
+        </div>
+       <script src="https://cdnjs.cloudflare.com/ajax/libs/jquery/3.3.1/jquery.min.js"></script>
+    </body>
+</html>
