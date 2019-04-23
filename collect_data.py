@@ -38,26 +38,27 @@ def get_data():
     return df, raw_data
 
 def get_features(df):
-    #'channels_cat' simplifies to 2 categories for channels: 0 for (fraud-prone) '0' channel; '1' for all others
-    channels_idx = df[(df.channels==0)].index
-    df['channels_cat'] = 1
-    df['channels_cat'].iloc[list(channels_idx)]=0
-    # simplifies payment types into 3 categories, check has almost no fraud
-    payout_Aidx = df[(df.payout_type=='ACH')].index #for ACH
-    payout_Cidx = df[(df.payout_type=='CHECK')].index #for CHECK
-    df['payout_cat'] = 2
-    df['payout_cat'].iloc[list(payout_Aidx)]=1
-    df['payout_cat'].iloc[list(payout_Cidx)]=0
-
-    #'country_cat' simplifies to 2 categories for country: 0 for less fraud prone and 1 for high risk countries
-    #“Regular” countries include: AT (Austria), SG (Singapore), TH (Thailand), ZA (South Africa), SE (Sweden),
-    #NZ (New Zealand), NL (Netherlands), GB (UK), FR (France), US, BE (Belgium), CA (Canada), ES (Spain), AU (Australia)
-    country_idx = df[(df.country=='AT')| (df.country=='SG')| (df.country=='TH')| (df.country=='ZA')| (df.country=='SE')| (df.country=='NZ')| (df.country=='NL')| (df.country=='GB')| (df.country=='FR')| (df.country=='US')| (df.country=='BE')| (df.country=='CA')| (df.country=='ES')| (df.country=='AU')].index
-    df['country_cat'] = 1
-    df['country_cat'].iloc[list(country_idx)]=0
-
-    # create feature matrix
-    X= df[['num_order','user_age','num_payouts','country_cat','payout_cat','body_length','channels_cat', 'gts']].values
+    '''
+    Takes in the dataframe and creates new features.
+    Returns a feature matrix.
+    '''
+    
+    #'country_cat' simplifies to 2 categories for country: 0 for "safer" and 1 for more fraud prone
+    fraud_prone_countries =['VN','MY','PK','MA','CH','PH','A1','CI','PS','TR','CZ',
+                            'KH','NA','GH','SI','CM','RU','DZ','IL','CN','DK','CO','JE']
+    df['country_cat'] = 0
+    df['country_cat'][df.country.isin(fraud_prone_countries)] = 1
+    
+    
+    # 'upper' creates a binary classifier for whether or not the title is in all uppercase letters or not
+    df['upper'] = df.name.apply(lambda x: x.isupper())
+    df.upper = df.upper.astype(int)
+    
+    # 'time_until_end' creates a value for the difference in time between event creation and the scheduled end of the event
+    df['time_until_end']=df.event_end-df.event_created
+    
+    X = df[['user_age', 'country_cat', 'upper', 'time_until_end', 'num_order', 'body_length']].values
+    
     return X
 
 def send_to_db(data, probability, collection):
