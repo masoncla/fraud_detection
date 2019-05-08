@@ -3,6 +3,7 @@ import numpy as np
 from sklearn.ensemble import GradientBoostingClassifier, RandomForestClassifier
 import pickle
 from sys import argv
+import nlp_class
 
 
 def get_features(df):
@@ -30,7 +31,7 @@ def get_features(df):
     # 'time_until_end' creates a value for the difference in time between event creation and the scheduled end of the event
     df['time_until_end']=df.event_end-df.event_created
     
-    X = df[['user_age', 'country_cat', 'upper', 'time_until_end', 'num_order', 'body_length']].values
+    X = df[['user_age', 'country_cat', 'upper', 'time_until_end', 'num_order', 'body_length']]
     y = df.label.values
     
     return X,y
@@ -47,10 +48,19 @@ if __name__ == '__main__':
     
     df = pd.read_json(input_filepath)
     
+    # get the engineered features
     X,y = get_features(df)
     
+    # get the LSA reduced Tfidf representations of the descriptions
+    nlp = nlp_class.NLP_Feature_Engineer_()
+    lsaX = nlp.fit_transform(df)
+    
+    # put them into one dataframe
+    fullX = pd.concat((X, pd.DataFrame(lsaX)), axis=1)
+    
+    
     model = RandomForestClassifier(criterion='entropy', max_depth=50, n_estimators=100)
-    model.fit(X,y)
+    model.fit( fullX.values , y )
     
     with open('model.pkl', 'wb') as f:
         # Write the fit model to a file.
