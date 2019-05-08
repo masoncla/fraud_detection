@@ -7,6 +7,7 @@ import threading
 from pymongo import MongoClient
 import time
 from flask import Flask
+import nlp_class
 
 
 # initialization
@@ -69,8 +70,12 @@ def send_to_db(data, probability, collection):
     collection.insert(data)
 
 def predict_fraud():
+    # get data and generate features
     df, data = get_data()
     X = get_features(df)
+    lsaX = nlp_class.NLP_Feature_Engineer_().fit_transform(df)
+    X = pd.concat((X, lsaX), axis=1)
+    # predict probability that an event is fraud and send to MongoDB
     predicted_proba = model.predict_proba(X)
     send_to_db(data, predicted_proba[:,1][0], collection)
 
